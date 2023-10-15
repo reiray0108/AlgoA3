@@ -1,1 +1,3 @@
-# AlgoA3
+# Deadlock and Optimizations
+
+Explain your optimizations if applicable
