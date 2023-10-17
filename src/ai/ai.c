@@ -215,7 +215,48 @@ void find_solution(sokoban_t* init_data, bool show_solution)
 	/** 
 	 * FILL IN THE GRAPH ALGORITHM 
 	 * */
-	
+	printf("Starting main loop...\n");
+
+    while (pq.count > 0) {
+		printf("Cringe\n");
+        node_t* current_node = heap_delete(&pq);
+		printf("Current node priority: %d\n", current_node->priority);
+
+        // Check for winning condition
+        if (winning_condition(init_data, &current_node->state)){
+			printf("Found solution\n");
+            solution = save_solution(current_node);
+            break;
+        }
+
+        // Try all possible moves
+        for (move_t action = up; action <= right; action++){
+			printf("Trying\n");
+            node_t* new_node;
+            if (applyAction(init_data, current_node, &new_node, action)){
+                // Check for simple corner deadlock
+                if (simple_corner_deadlock(init_data, &new_node->state)){
+                    free(new_node);
+                    continue;
+                }
+
+                // Check for duplicates
+                flatten_map(init_data, &flat_map, new_node->state.map);
+                if (ht_contains(&hashTable, flat_map)){
+                    free(new_node);
+                    continue;
+                }
+
+                // Add to priority queue and hash table
+                heap_push(&pq, new_node);
+                ht_insert(&hashTable, flat_map, flat_map);
+            }
+        }
+
+        // Update explored table
+        update_explore_table(current_node, expanded_nodes);
+        expanded_nodes++;
+    }
 
 	//----------------------------
 	
